@@ -1,0 +1,25 @@
+Tileset
+-------
+
+Features:
+Animated tiles with delays
+Two animation formats(loop and ping pong)
+
+
+Info:
+Tiles are the tiles described by the tileset.
+Tileblocks are the tiles in the actual image.
+
+Tile and Tileblock 0 are completely transparent tiles.
+Tileblocks are number from 1 in the top left corner and accross for rows.
+Tiles are numbered from 1 in the file in the order they are defined.
+
+
+Format:
+<tileset image>
+(0|(1 <alpha map image>))
+<tile width> <tile height>
+<num rows> <num columns> #for error checking
+<num tiles>
+((0 <tile block>) | (1 <animation type> <delay> <num blocks> [<tile block>]+))+
+

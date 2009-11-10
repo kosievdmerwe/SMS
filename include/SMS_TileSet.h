@@ -91,6 +91,12 @@ private:
     bool LoadTextures(unsigned char* image, int imageWidth, int imageHeight);
     void UnloadTextures();
 
+    //copy a source rectangle to a destination point
+    void CopyImage(unsigned char* src, int src_img_w, 
+                   int src_x, int src_y, int src_w, int src_h, 
+                   unsigned char* dest, int dest_img_w, 
+                   int dest_x, int dest_y);
+
 private:
     bool mOpened;
 

@@ -280,7 +280,9 @@ bool SMS_TileSet::SetTileWidth(uint16_t width) {
     return true;
 }//SetTileWidth
 ///////////////////////////////////////////////////////////////////////////////
-bool SMS_TileSet::SetTileHeight(uint16_t height) { if (!IsTileSizeValid(height, false)) {
+bool SMS_TileSet::SetTileHeight(uint16_t height) { 
+    if (!IsTileSizeValid(height, false)) {
+        return false;
     }
     mTileHeight = height;
     return true;
@@ -342,9 +344,9 @@ bool SMS_TileSet::DrawTile(uint32_t tilenum, int x, int y) {
         GLCheck(glBindTexture(GL_TEXTURE_2D, mTextures[0]));
         glBegin(GL_QUADS);
             glTexCoord2f(0, 0); glVertex2i(x, y);
-            glTexCoord2f(0, 1); glVertex2i(x, y+mTextureHeight/2);
-            glTexCoord2f(1, 1); glVertex2i(x+mTextureWidth/2, y+mTextureHeight/2);
-            glTexCoord2f(1, 0); glVertex2i(x+mTextureWidth/2, y);
+            glTexCoord2f(0, 1); glVertex2i(x, y+mTextureHeight);
+            glTexCoord2f(1, 1); glVertex2i(x+mTextureWidth, y+mTextureHeight);
+            glTexCoord2f(1, 0); glVertex2i(x+mTextureWidth, y);
         glEnd();
     }
 
@@ -405,6 +407,10 @@ bool SMS_TileSet::IsTileSizeValid(uint16_t size, bool isWidth) {
 bool SMS_TileSet::LoadTextures(unsigned char* image, int imageWidth, int imageHeight) {
     uint32_t tileBlocksPerTex = (mTextureWidth/mTileWidth) * 
                                 (mTextureHeight/mTileHeight);
+    int numTilePerRow = imageWidth/mTileWidth;
+    int numTilePerCol = imageHeight/mTileHeight;
+    int numTileTexPerRow = mTextureWidth/mTileWidth;
+    int numTileTexPerCol = mTextureHeight/mTileHeight;
 
     size_t bufferlen = mTextureWidth*mTextureHeight*4;
     unsigned char* buffer = new unsigned char[bufferlen];
@@ -414,7 +420,9 @@ bool SMS_TileSet::LoadTextures(unsigned char* image, int imageWidth, int imageHe
             buffer[i] = 0;
 
         //copy tiles over
-        //TODO
+        //TODO: copy over properly
+        CopyImage(image, imageWidth, 0, 0, mTileWidth, mTileHeight, 
+                  buffer, mTextureWidth, 0, 0);
         
         //create texture
         GLCheck(glBindTexture(GL_TEXTURE_2D, mTextures[curtex]));
@@ -435,7 +443,6 @@ bool SMS_TileSet::LoadTextures(unsigned char* image, int imageWidth, int imageHe
         GLCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
         GLCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
     }
-    UnloadTextures();
     delete[] buffer;
     return true;
 }//LoadTextures
@@ -447,4 +454,16 @@ void SMS_TileSet::UnloadTextures() {
     mTextures = std::vector<unsigned int>();
     mTextureWidth = mTextureHeight = 0;
 }//UnloadTextures
+///////////////////////////////////////////////////////////////////////////////
+void SMS_TileSet::CopyImage(unsigned char* src, int src_img_w, 
+                            int src_x, int src_y, int src_w, int src_h, 
+                            unsigned char* dest, int dest_img_w, 
+                            int dest_x, int dest_y) {
+    for (int y = 0; y < src_h; ++y) {
+        for (int x = 0; x < src_w*4; ++x) {
+            dest[(dest_y+y)*dest_img_w*4+dest_x*4+x] = 
+                src[(src_y+y)*src_img_w*4+src_x*4+x];
+        }
+    }
+}//CopyImage
 ///////////////////////////////////////////////////////////////////////////////

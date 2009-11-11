@@ -414,15 +414,23 @@ bool SMS_TileSet::LoadTextures(unsigned char* image, int imageWidth, int imageHe
 
     size_t bufferlen = mTextureWidth*mTextureHeight*4;
     unsigned char* buffer = new unsigned char[bufferlen];
+
+    uint32_t curTileBlock = 0;
     for (size_t curtex = 0; curtex < mTextures.size(); ++curtex) {
         //reset buffer to transparent
         for (size_t i = 0; i < bufferlen; ++i)
             buffer[i] = 0;
 
         //copy tiles over
-        //TODO: copy over properly
-        CopyImage(image, imageWidth, 0, 0, mTileWidth, mTileHeight, 
-                  buffer, mTextureWidth, 0, 0);
+        for (uint32_t i = 0; i < tileBlocksPerTex; ++i) {
+            int src_x = (curTileBlock%numTilePerRow)*mTileWidth;
+            int src_y = (curTileBlock/numTilePerRow)*mTileHeight;
+            int dest_x = (i%numTileTexPerRow)*mTileWidth;
+            int dest_y = (i/numTileTexPerRow)*mTileHeight;
+            CopyImage(image, imageWidth, src_x, src_y, mTileWidth, mTileHeight, 
+                  buffer, mTextureWidth, dest_x, dest_y);
+            curTileBlock++;
+        }
         
         //create texture
         GLCheck(glBindTexture(GL_TEXTURE_2D, mTextures[curtex]));
